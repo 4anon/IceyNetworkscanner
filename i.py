@@ -20,8 +20,16 @@ while True:
 			ans.summary(lambda (s,r): r.sprintf("[+]You did find: " + "[*]IP: %ARP.psrc% [*]MAC: %Ether.src% "))
 		except:
 			print "Host Discovery Failed"
+			print "1. Host Discovery - 1"
+			print "2. Port Scanning - 2"
+			print "3. Misc. - 3"
+			print "4. Exit - 4"
 	elif choice == "2":
 		print "you did choose Port Scanning"
+		print "1. Host Discovery - 1"
+		print "2. Port Scanning - 2"
+		print "3. Misc. - 3"
+		print "4. Exit - 4"
 	elif choice == "3":
 		print "you did choose misc."
 	elif choice == "4":
