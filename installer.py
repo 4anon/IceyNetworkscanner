@@ -1,5 +1,5 @@
 
-
+import time
 import os
 import sys
 import platform
@@ -48,7 +48,9 @@ elif osversion == 'Windows' or 'Windows':
 	print '[~] Go shoot yourself'
 	print '[*] Icey Network Scanner is made for Linux'
 	print '[*] Exiting...'
+	time.sleep(6)
 	sys.exit()
+	
 
 
 else:
