@@ -13,8 +13,9 @@ from scapy.all import *
 #Getting Useful information automatically
 route = check_output(['route'])
 gateaway,iface= (route.split()[i] for i in (19,20) )
+errorhandlingmessage = 'unknown port'
 closed = 0
- 
+portlist = { 80: 'webserver'}  
 class Scanner(threading.Thread):
     """ Scanner Thread class """
     def __init__(self, queue, lock, ip):
@@ -35,12 +36,14 @@ class Scanner(threading.Thread):
         elif resp.haslayer(TCP):
             if resp.getlayer(TCP).flags == 0x12:
                 send_rst = sr(IP(dst=self.ip)/TCP(sport=src_port, dport=port, flags='AR'), timeout=1)
-                with self.lock:
-                    print "[*] %d open" % port
+                with self.lock: 
+                    print "[*] %d %s open" % (port, portlist.get(port, errorhandlingmessage))
             elif resp.getlayer(TCP).flags == 0x14:
                 with self.lock:
                     closed += 1
         self.queue.task_done()
+
+                                                                                
 
 def is_up(ip):
     p = IP(dst=ip)/ICMP()
@@ -65,12 +68,24 @@ def scan_ports():
     print
     print
     print "[*] You did choose Port Scanning"
-
     ip = raw_input("[+]Please enter your Target > ")
-
+    minport = raw_input("[+] Please enter the minimum of port to scan, Enter to keep default range > ")
+    maxport = raw_input("[+] Please enter the maximum port to scan, Enter to keep default range\n  tip: dont do to much, then it takes to much time > ")
+    empty = ''
+    try:
+        if minport and maxport != 0:
+            ports = range(int(minport), int(maxport))
+        elif minport and maxport == 0:
+            ports = range(1, 1024)
+        else:
+            print "[~]Something went wrong"
+            sys.exit()
+    except:
+        print "[~]Error in the File"
+        print "[*] Exiting"
+        sys.exit()
     conf.verb = 0
     start_time = time.time()
-    ports = range(1, 1024)
     lock = threading.Lock()
     queue = Queue.Queue()
     if is_up(ip):
@@ -102,6 +117,10 @@ def get_user_choice(choices):
         for i, (name, _) in choices.items():
             print '%s. %s' % (i, name)
         choice = raw_input('> ').strip()
+        if choice not in choices:
+            print "[~]%s is not a valid Command " % choice
+            print 
+            print
 
     return choice
 
@@ -113,7 +132,7 @@ print'''
  |___\__\___|\_, | |_|\_\___|\__|\_/\_/\___/_| |_\_\ |___/\__\__,_|_||_|_||_\___|_|  
              |__/                                                                   
 
-Installer
+
 '''
 
 choices = OrderedDict((
@@ -121,9 +140,9 @@ choices = OrderedDict((
     ('2', ('Port Scanning', scan_ports)),
     ('3', ('Misc', misc)),
     ('4', ('Exit', exit))
+
 ))
 
 while True:
     choice = get_user_choice(choices)
-    print 'you chose %s (type: %s)' % (choice, type(choice))
     choices[choice][1]()
